@@ -46,13 +46,31 @@ app.get('/', (req, res) => {
     res.json({
         status: 'online',
         service: 'Autos CRM WebSocket Server',
-        version: '1.1.0',
+        version: '1.2.0',
         connectedUsers: connectedUsers.size
     });
 });
 
 app.get('/health', (req, res) => {
     res.json({ status: 'healthy', timestamp: new Date().toISOString() });
+});
+
+// Lista de usuarios conectados con sus userId reales
+app.get('/users/online', (req, res) => {
+    const online = [];
+    connectedUsers.forEach((user, socketId) => {
+        if (user.userId && parseInt(user.userId) > 0) {
+            // Evitar duplicados si el mismo usuario tiene varias pestañas abiertas
+            if (!online.find(u => u.userId === parseInt(user.userId))) {
+                online.push({
+                    userId:   parseInt(user.userId),
+                    userName: user.userName,
+                    userRole: user.userRole
+                });
+            }
+        }
+    });
+    res.json({ online, total: online.length });
 });
 
 // Endpoint genérico para que PHP emita eventos (tasaciones, chat, etc.)
@@ -166,5 +184,5 @@ io.on('connection', (socket) => {
 });
 
 server.listen(PORT, () => {
-    console.log(`🚀 Servidor WebSocket v1.1.0 iniciado en puerto ${PORT}`);
+    console.log(`🚀 Servidor WebSocket v1.2.0 iniciado en puerto ${PORT}`);
 });
