@@ -84,6 +84,12 @@ io.on('connection', (socket) => {
         const { userId, userName, userRole } = data;
         connectedUsers.set(socket.id, { userId, userName, userRole });
         console.log(`👤 Autenticado: ${userName} (id=${userId})`);
+
+        // Unirse al room personal — garantiza recepción de mensajes sin importar
+        // qué conversación tenga abierta el usuario
+        socket.join(`user:${userId}`);
+        console.log(`📬 Usuario ${userName} unido a room: user:${userId}`);
+
         socket.emit('authenticated', { socketId: socket.id });
 
         // Avisar al resto que este usuario se conectó
